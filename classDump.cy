@@ -266,7 +266,8 @@ function dumpMethodsFromClass(Class) {
 
 // *** General dump (main methods) ****
 
-function dumpBundle(bundle) {
+function dumpBundle(bundle, prefix) {
+    prefix = prefix == undefined ? nil : prefix
     try {   
         [FZBundler class];
     } catch (e) {
@@ -274,19 +275,22 @@ function dumpBundle(bundle) {
         loadFZBundler();
     }
 
-    [objc_getClass("FZBundler") dumpBundle:bundle];
+    [objc_getClass("FZBundler") dumpBundle:bundle prefix:prefix];
 }
 
 function loadFZBundler() {
     @implementation FZBundler : NSObject {}
-    + (id)dumpBundle:(NSBundle *)bundle {
+    + (id)dumpBundle:(NSBundle *)bundle prefix:(NSString *)prefix {
         var enumerator = [ObjectiveC.classes keyEnumerator]
         while ((name = [enumerator nextObject])) {
-            if ([[NSBundle bundleForClass:objc_getClass(name)] isEqual:bundle]){
-                [self performSelectorInBackground:@selector(dump:) withObject:name];
+            var cbundle = [NSBundle bundleForClass:objc_getClass(name)];
+            if ([cbundle isEqual:bundle] && [name hasPrefix:prefix]) {
+                [self performSelectorInBackground:@selector(dump:)
+                                       withObject:name];
             }
         }
     }
+
     + (void)dump:(NSString *)name {
         try {
             classDump(objc_getClass(name));
