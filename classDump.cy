@@ -8,8 +8,8 @@ NSTemporaryDirectory = new Functor(NSTemporaryDirectory_, "@");
 // *** Constants ****
 
 let commonStructsMap = {
-    "CGRect": "CGRect", 
-    "CGPoint": "CGPoint", 
+    "CGRect": "CGRect",
+    "CGPoint": "CGPoint",
     "CGSize": "CGSize",
     "CFDictionary": "NSDictionary *"
 };
@@ -51,14 +51,14 @@ function dumpProtocolMethods(protocol, isRequiredMethod) {
 
     for (isInstanceMethod of [true, false]) {
         var methodsCount = new int;
-        let methods = protocol_copyMethodDescriptionList(protocol, 
+        let methods = protocol_copyMethodDescriptionList(protocol,
             isRequiredMethod, isInstanceMethod, methodsCount);
 
         totalMethods += *methodsCount;
         let methodPrefix = isInstanceMethod ? "-" : "+";
         for (var i = 0; i < *methodsCount; i++) {
             let selectors = methods[i][0].toString().split(":");
-            let sign = [NSMethodSignature 
+            let sign = [NSMethodSignature
                         signatureWithObjCTypes:methods[i][1]];
             let returnType = typeForAttribute([sign methodReturnType], "");
             var params = [];
@@ -100,7 +100,7 @@ function dumpProtocol(protocol) {
 
 function dumpProtocolsFromClass(Class, outputdir) {
     var protocolsCount = new int;
-    let protocols = class_copyProtocolList(Class, protocolsCount); 
+    let protocols = class_copyProtocolList(Class, protocolsCount);
     var protocolNames = [];
     for (var i = 0; i < *protocolsCount; i++) {
         if (class_conformsToProtocol(Class, protocols[i])) {
@@ -168,7 +168,7 @@ function dumpProperty(property) {
     let name = property_getName(property);
     let attributes = property_getAttributes(property).split(",");
     let typeAndName = typeForAttribute(attributes[0].slice(1), name);
-    
+
     var properties = [];
     for each (attribute in attributes.slice(1)) {
         if (attribute.slice(0, 2) == "V_") {
@@ -187,7 +187,7 @@ function dumpProperty(property) {
             };
             properties.unshift(modifierMap[attribute] ?: "")
         }
-        
+
         if (attribute[0] == "G" || attribute[0] == "S") {
             let modifier = attribute[0] == "G" ? "getter" : "setter";
             let property = modifier + "=" + attribute.slice(1);
@@ -213,7 +213,7 @@ function dumpIvarsFromClass(Class) {
     var count = new int;
     let ivarList = class_copyIvarList(Class, count);
     let ivars = range(*count).map(function(i) {
-        let ivarName = ivar_getName(ivarList[i]);   
+        let ivarName = ivar_getName(ivarList[i]);
         let ivarType = ivar_getTypeEncoding(ivarList[i]);
         return "    " + typeForAttribute(ivarType, ivarName) + ";";
     });
@@ -241,7 +241,7 @@ function dumpMethod(method, isInstance) {
 
         signature = methods.join(" ");
     }
-    
+
     free(charType);
     let prefix = isInstance ? "-" : "+";
     return prefix + " (" + returnType + ")" + signature + ";";
@@ -268,7 +268,7 @@ function dumpMethodsFromClass(Class) {
 
 function dumpBundle(bundle, prefix) {
     prefix = prefix == undefined ? nil : prefix
-    try {   
+    try {
         [FZBundler class];
     } catch (e) {
         NSLog("Error " + e);
@@ -294,7 +294,7 @@ function loadFZBundler() {
     + (void)dump:(NSString *)name {
         try {
             classDump(objc_getClass(name));
-        } 
+        }
         catch (e) {
         }
     }
@@ -327,7 +327,7 @@ function classDump(Class) {
     let ivars = dumpIvarsFromClass(Class);
     let properties = dumpPropertiesFromClass(Class);
     let methods = dumpMethodsFromClass(Class);
-    let body = imports + "\n\n" + interface + "{\n" + ivars + "\n}\n\n" + 
+    let body = imports + "\n\n" + interface + "{\n" + ivars + "\n}\n\n" +
         properties + "\n" + methods + "\n\n@end\n";
 
     // Save class dump into .h file.
