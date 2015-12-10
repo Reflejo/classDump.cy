@@ -40,7 +40,7 @@ let commonTypes = {
 };
 
 function range(n) {
-    return Array.apply(null, Array(n)).map(function (_, i) { return i });
+    return Array.apply(null, Array(n)).map(function (_, i) { return i; });
 }
 
 // *** Protocols ****
