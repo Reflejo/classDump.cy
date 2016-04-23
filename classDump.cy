@@ -76,7 +76,6 @@ function dumpProtocolMethods(protocol, isRequiredMethod) {
             body += methodPrefix + "(" + returnType + ")" + method + ";\n";
         }
 
-        free(methodsCount);
         free(methods);
     }
 
@@ -90,7 +89,6 @@ function dumpProtocol(protocol) {
     let list = protocol_copyPropertyList(protocol, propertiesCount);
     let properties = range(*propertiesCount).map(i => dumpProperty(list[i]));
 
-    free(propertiesCount);
     free(list);
 
     return header + properties.join("\n") + "\n" +
@@ -112,7 +110,6 @@ function dumpProtocolsFromClass(Class, outputdir) {
             protocolNames.push(protocolName);
         }
     }
-    free(protocolsCount);
     free(protocols);
 
     return protocolNames;
@@ -160,8 +157,8 @@ function typeForAttribute(attribute, name) {
         return "struct {\n" + members.join(";\n") + "\n    } " + name;
     }
 
-    let attribute = commonTypes[attribute] ?: attribute;
-    return attribute + postfix;
+    let attrs = commonTypes[attribute] || attribute;
+    return attrs + postfix;
 }
 
 function dumpProperty(property) {
@@ -185,7 +182,7 @@ function dumpProperty(property) {
                 "W": "__weak",
                 "P": "t<encoding>"
             };
-            properties.unshift(modifierMap[attribute] ?: "")
+            properties.unshift(modifierMap[attribute] || "")
         }
 
         if (attribute[0] == "G" || attribute[0] == "S") {
@@ -204,7 +201,6 @@ function dumpPropertiesFromClass(Class) {
     let properties = class_copyPropertyList(Class, count);
     let lines = range(*count).map(i => dumpProperty(properties[i]));
     free(properties);
-    free(count);
 
     return lines.join("\n");
 }
@@ -219,7 +215,6 @@ function dumpIvarsFromClass(Class) {
     });
 
     free(ivarList);
-    free(count);
 
     return ivars.join("\n");
 }
@@ -258,8 +253,6 @@ function dumpMethodsFromClass(Class) {
 
     free(methods);
     free(classMethods);
-    free(classCount);
-    free(count);
 
     return lines.concat(classLines).join("\n");
 }
