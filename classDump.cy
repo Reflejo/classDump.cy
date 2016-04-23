@@ -264,20 +264,28 @@ function dumpBundle(bundle, prefix) {
     try {
         [FZBundler class];
     } catch (e) {
-        NSLog("Error " + e);
         loadFZBundler();
     }
 
     [objc_getClass("FZBundler") dumpBundle:bundle prefix:prefix];
 }
 
+function _classIsInternal(name) {
+    return [name hasPrefix:@"NS"] || [name hasPrefix:@"_"] ||
+        [name hasPrefix:@"MF"] || [name hasPrefix:@"UI"] ||
+        [name hasPrefix:@"AV"];
+}
+
 function loadFZBundler() {
     @implementation FZBundler : NSObject {}
     + (id)dumpBundle:(NSBundle *)bundle prefix:(NSString *)prefix {
-        var enumerator = [ObjectiveC.classes keyEnumerator]
+        var enumerator = [ObjectiveC.classes keyEnumerator];
         while ((name = [enumerator nextObject])) {
-            var cbundle = [NSBundle bundleForClass:objc_getClass(name)];
-            if ([cbundle isEqual:bundle] && [name hasPrefix:prefix]) {
+            let hasPrefix = prefix == null || [name hasPrefix:prefix];
+            let isBundle = [[NSBundle bundleForClass:objc_getClass(name)] 
+                            isEqual:bundle];
+
+            if (isBundle && hasPrefix && !_classIsInternal(name)) {
                 [self performSelectorInBackground:@selector(dump:)
                                        withObject:name];
             }
@@ -286,7 +294,7 @@ function loadFZBundler() {
 
     + (void)dump:(NSString *)name {
         try {
-            classDump(objc_getClass(name));
+            classDump(objc_getClass(name.toString()));
         }
         catch (e) {
         }
@@ -296,14 +304,14 @@ function loadFZBundler() {
 
 function classDump(Class) {
     let outputdir = NSTemporaryDirectory();
-    let path = outputdir + Class.description + ".h";
+    let path = @(outputdir + Class.description + ".h");
 
-    if ([NSFileManager.defaultManager fileExistsAtPath:path]) {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:false]) {
         NSLog("[classdump] Class already dumped " + Class);
         return path
     }
 
-    NSLog("[classdump] Dumping class " + Class);
+    NSLog("[classdump] Dumping class %@ into %@", Class, path);
 
     // Protocol(s) dump
     let protocols = dumpProtocolsFromClass(Class, outputdir);
