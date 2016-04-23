@@ -304,7 +304,7 @@ function loadFZBundler() {
 
 function classDump(Class) {
     let outputdir = NSTemporaryDirectory();
-    let path = @(outputdir + Class.description + ".h");
+    let path = @(outputdir + [Class description] + ".h");
 
     if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:false]) {
         NSLog("[classdump] Class already dumped " + Class);
@@ -319,9 +319,9 @@ function classDump(Class) {
     protocols = protocols.length ? " <" + protocols.join(", ") + ">" : "";
 
     let interface = "@interface " + Class;
-    if (Class.superclass.className !== undefined) {
+    if ([[Class superclass] className] !== undefined) {
         // Add parent class to interface (as needed)
-        interface += " : " + Class.superclass;
+        interface += " : " + [Class superclass];
     }
     interface += " " + protocols;
 
