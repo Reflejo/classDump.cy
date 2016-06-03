@@ -1,5 +1,3 @@
-@import org.cycript.NSLog;
-
 // *** Symbols loading ****
 
 NSTemporaryDirectory_ = dlsym(RTLD_DEFAULT, "NSTemporaryDirectory");
@@ -282,7 +280,7 @@ function loadFZBundler() {
         var enumerator = [ObjectiveC.classes keyEnumerator];
         while ((name = [enumerator nextObject])) {
             let hasPrefix = prefix == null || [name hasPrefix:prefix];
-            let isBundle = [[NSBundle bundleForClass:objc_getClass(name)] 
+            let isBundle = [[NSBundle bundleForClass:objc_getClass(name)]
                             isEqual:bundle];
 
             if (isBundle && hasPrefix && !_classIsInternal(name)) {
